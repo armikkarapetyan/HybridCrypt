@@ -4,7 +4,6 @@ import DecryptForm from "./components/DecryptionForm"
 function App() {
   return (
     <div>
-      <h1>HybridCrypt </h1>
       < EncryptForm />
       < DecryptForm />
     </div>
@@ -12,3 +11,5 @@ function App() {
 }
 
 export default App;
+
+

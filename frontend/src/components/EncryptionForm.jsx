@@ -11,6 +11,7 @@ export default function EncryptForm() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setEncryptedData(null);
 
     try {
       const res = await axios.post("http://localhost:3004/api/messages/encrypt", { text });
@@ -24,31 +25,36 @@ export default function EncryptForm() {
   };
 
   return (
-    <div style={{ padding: "2rem", fontFamily: "Arial" }}>
-      <h2>Encrypt Text</h2>
-      <form onSubmit={handleEncrypt}>
-        <input
-          type="text"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Enter text"
-          style={{ padding: "0.5rem", width: "300px" }}
-          required
-        />
-        <button type="submit" style={{ padding: "0.5rem 1rem", marginLeft: "1rem" }}>
-          Encrypt
-        </button>
-      </form>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-6">
+      <div className="w-full max-w-lg bg-white shadow-xl rounded-2xl p-8">
+        <h2 className="text-3xl font-bold text-center text-purple-700 mb-6">Encrypt Text</h2>
+        <form onSubmit={handleEncrypt} className="flex flex-col gap-4">
+          <input
+            type="text"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Enter text"
+            className="border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-400 text-lg"
+            required
+          />
+          <button
+            type="submit"
+            className="bg-purple-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-purple-700 transition"
+          >
+            Encrypt
+          </button>
+        </form>
 
-      {loading && <p>Encrypting...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+        {loading && <p className="text-center text-gray-500 mt-4">Encrypting...</p>}
+        {error && <p className="text-center text-red-500 mt-4">{error}</p>}
 
-      {encryptedData && (
-        <div style={{ marginTop: "1.5rem", wordBreak: "break-all" }}>
-          <p><strong>Encrypted:</strong></p>
-          <pre>{encryptedData.encrypted}</pre>
-        </div>
-      )}
+        {encryptedData && (
+          <div className="mt-6 bg-gray-100 p-4 rounded-lg break-words">
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">Encrypted Text:</h3>
+            <p className="text-purple-700 break-words">{encryptedData.encrypted}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
