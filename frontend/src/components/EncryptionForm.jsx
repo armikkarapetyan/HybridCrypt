@@ -14,7 +14,7 @@ export default function EncryptForm() {
     setEncryptedData(null);
 
     try {
-      const res = await axios.post("http://localhost:3004/api/messages/encrypt", { text });
+      const res = await axios.post("http://localhost:3005/api/messages/encrypt", { text });
       setEncryptedData(res.data);
     } catch (err) {
       console.error(err);

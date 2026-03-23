@@ -14,7 +14,7 @@ export default function DecryptForm() {
     setDecrypted("");
 
     try {
-      const res = await axios.post("http://localhost:3004/api/messages/decrypt", {
+      const res = await axios.post("http://localhost:3005/api/messages/decrypt", {
         encrypted
       });
       setDecrypted(res.data.decryptedText);
