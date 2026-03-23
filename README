@@ -1,0 +1,14 @@
+HybridCrypt is a web application that allows users to encrypt and decrypt text using a combination of FWHT, AES, and RSA algorithms. It demonstrates secure encryption, key management, and interactive front-end usage with React + Vite. 
+
+Features 
+1. Encrypt text with FWHT → AES → RSA
+2. Decrypt encrypted text back to original
+3. Save encrypted messages in MongoDB
+4. Simple and interactive UI with React
+5. Responsive design using TailwindCSS
+
+Tech Stack
+1. Backend: Node.js, Express.js, MongoDB, Mongoose
+2. Encryption: FWHT, AES-256-CBC, RSA
+3. Frontend: React, Vite, TailwindCSS
+4. HTTP Requests: Axios
