@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const messageSchema = new mongoose.Schema({
   text: { type: String, required: true },
+  encrypted: [Number],
   createdAt: { type: Date, default: Date.now }
 });
 
