@@ -41,31 +41,9 @@ export function fwht(x) {
   return y;
 }
 
-// inverse
+// inverse FWHT
 export function ifwht(x) {
   let n = x.length;
-  let y = fwht(x);
+  const y = fwht(x);
   return y.map(v => v / n);
-}
-
-// key from text 
-export function generateKeyFromText(text, n) {
-  const words = text.split(" ");
-  let key = "";
-
-  // Take first and last letters of each word (if length >= 2)
-  for (let word of words) {
-    if (word.length >= 2) {
-      key += word[0] + word[word.length - 1];
-    } else {
-      key += word[0]; // if single letter word
-    }
-  }
-
-  // Repeat key until it matches length n
-  while (key.length < n) {
-    key += key;
-  }
-
-  return key.slice(0, n);
 }

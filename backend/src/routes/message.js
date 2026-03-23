@@ -1,72 +1,70 @@
 import express from "express";
 import { Message } from "../models/index.js";
-import { fwht, textToVec, nextPow2, ifwht, vecToText, generateKeyFromText } from "../utils/fwht.js";
+import { fwht, ifwht, textToVec, vecToText, nextPow2 } from "../utils/fwht.js";
+import { aesEncrypt, aesDecrypt } from "../utils/aes.js";
+import { generateRSAKeys, rsaEncrypt, rsaDecrypt } from "../utils/rsa.js";
+import { env } from "../config/env.js";
 
 const router = express.Router();
 
+// Generate RSA keys (for demo; in prod, save securely)
+const { publicKey, privateKey } = generateRSAKeys();
+
+// POST /encrypt
 router.post("/", async (req, res) => {
   try {
-    const { text, keyText } = req.body;
-    if (!text || !keyText) {
-      return res.status(400).json({ error: "Text and keyText are required" });
-    }
+    const { text } = req.body;
+    if (!text) return res.status(400).json({ error: "Text required" });
 
+    // FWHT
     const L = text.length;
     const n = nextPow2(L);
     const vec = textToVec(text, n);
-    let encrypted = fwht(vec);
+    const fwhtResult = fwht(vec);
 
-    // Use your key generator
-    const key = generateKeyFromText(keyText, n).split("").map(c => c.charCodeAt(0));
+    // AES
+    const { encrypted: aesEncrypted, iv } = aesEncrypt(JSON.stringify(fwhtResult));
 
-    // Add key
-    encrypted = encrypted.map((v, i) => v + key[i]);
+    // RSA (encrypt AES key)
+    const aesKeyEncrypted = rsaEncrypt(env.AES_SECRET, publicKey);
 
-    const newMessage = new Message({ text, encrypted });
+    // Save in DB
+    const newMessage = new Message({
+      text,
+      encrypted: aesEncrypted,
+      iv,
+      rsaKey: aesKeyEncrypted
+    });
     await newMessage.save();
 
-    res.status(201).json({
-      message: "Message encrypted and saved successfully",
-      encrypted 
-    });
-
+    res.status(201).json({ message: "Encrypted saved", aesEncrypted, iv, aesKeyEncrypted });
   } catch (err) {
-    console.error("POST error:", err);
+    console.error("ENCRYPT error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
 
-router.post("/decrypt", async (req,res) => {
-    try {
-      const { encrypted, keyText, length } = req.body
-
-      if (!encrypted || !keyText || !length) {
-        return res.status(400).json({ error: "Missing data" });
-      }
-
-       const n = encrypted.length;
-       // Generate same key
-       const key = generateKeyFromText(keyText, n).split("").map(c => c.charCodeAt(0));
-      // Subtract key
-      const spectrum = encrypted.map((v, i) => v - key[i]);
-      // Inverse FWHT
-      const vec = ifwht(spectrum);
-      const text = vecToText(vec, length);
-
-     res.json({ decrypted: text });
- 
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server error" });
-    }
-});
-
-router.get("/", async (req, res) => {
+// POST /decrypt
+router.post("/decrypt", async (req, res) => {
   try {
-    const messages = await Message.find().sort({ createdAt: -1 });
-    res.json(messages);
+    const { aesEncrypted, iv, aesKeyEncrypted, length } = req.body;
+    if (!aesEncrypted || !iv || !aesKeyEncrypted || !length) {
+      return res.status(400).json({ error: "Missing data" });
+    }
+
+    // RSA decrypt AES key
+    const aesKey = rsaDecrypt(aesKeyEncrypted, privateKey);
+
+    // AES decrypt
+    const fwhtJson = aesDecrypt(aesEncrypted, aesKey, iv);
+    const fwhtArray = JSON.parse(fwhtJson);
+
+    // Inverse FWHT
+    const decryptedText = vecToText(ifwht(fwhtArray), length);
+
+    res.json({ decryptedText });
   } catch (err) {
-    console.error(err);
+    console.error("DECRYPT error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
