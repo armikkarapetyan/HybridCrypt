@@ -4,6 +4,7 @@ import { fwht, ifwht, textToVec, vecToText, nextPow2 } from "../utils/fwht.js";
 import { aesEncrypt, aesDecrypt } from "../utils/aes.js";
 import { generateRSAKeys, rsaEncrypt, rsaDecrypt } from "../utils/rsa.js";
 import { env } from "../config/env.js";
+import mongoose from "mongoose";
 
 const router = express.Router();
 
